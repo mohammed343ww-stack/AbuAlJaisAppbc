@@ -1,0 +1,28 @@
+name: Build APK
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Arrange files
+        run: |
+          mkdir -p app/src/main/assets app/src/main/res/values app/src/main/res/drawable app/src/main/java/com/abu/player
+          mv index.html app/src/main/assets/index.html
+          mv MainActivity.kt app/src/main/java/com/abu/player/MainActivity.kt
+          mv AndroidManifest.xml app/src/main/AndroidManifest.xml
+          mv themes.xml app/src/main/res/values/themes.xml
+          mv ic_launcher.xml app/src/main/res/drawable/ic_launcher.xml
+          mv app-build.gradle.kts app/build.gradle.kts
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+      - run: gradle assembleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AbuPlayer-APK
+          path: app/build/outputs/apk/release/*.apk
